@@ -21,7 +21,7 @@ import React from 'react';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import { Button, Form } from '@arco-design/web-react';
-import { Input, Select } from '@tcfuture/arco-design-formik';
+import { Input, Select } from '@typedarray/arco-design-formik';
 
 const validationSchema = Yup.object({
   username: Yup.string()
@@ -75,7 +75,7 @@ const App = () => (
 1. 自定义封装 `createField`，使用 `value` 和 `onChange` 实现自定义表单组件，通过 `formItemProps` 可以设置表单项的样式
 
 ```jsx
-import { createField } from '@tcfuture/arco-design-formik';
+import { createField } from '@typedarray/arco-design-formik';
 
 function MyField({
   value,
