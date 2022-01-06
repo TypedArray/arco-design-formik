@@ -5,7 +5,8 @@ import React, {
   ComponentType,
   ElementType,
   useCallback,
-  useState,
+  useEffect,
+  useRef,
 } from 'react';
 import isEqual from 'react-fast-compare';
 import getStatusProps from './getStatusProps';
@@ -53,6 +54,10 @@ export interface FieldProps<T extends ElementType, F extends ElementType> {
   validateOnChange?: boolean;
   /** Tells Formik to validate the form on each input's onBlur event */
   validateOnBlur?: boolean;
+  /**
+   * 默认 formik 不允许 undefined 值，所以需要用 nullable 来指定是否允许 undefined，会将 undefined 临时转换为 null 使用
+   */
+  nullable?: boolean;
 }
 
 type DistributiveOmit<T, K extends keyof any> = T extends any
@@ -93,33 +98,38 @@ export default function createField<P>(component: ComponentType<P>) {
       containerProps,
       validateOnChange,
       validateOnBlur,
+      nullable,
       // @ts-ignore
       onBlur,
       // @ts-ignore
       onChange,
       ...props
     }: FieldPropsOmitInputProps<P, T, F>) => {
-      const form = useFormikContext();
-      const field = form.getFieldProps(name);
-      const meta = form.getFieldMeta(name);
-      const helpers = form.getFieldHelpers(name);
+      const formik = useFormikContext();
+      const field = formik.getFieldProps(name);
+      const meta = formik.getFieldMeta(name);
+
       const Component: ElementType = component;
-      validateOnChange = validateOnChange ?? form.validateOnChange;
-      validateOnBlur = validateOnBlur ?? form.validateOnBlur;
-      const [invalidateValueFlag, setInvalidateValueFlag] = useState(true);
+      validateOnChange = validateOnChange ?? formik.validateOnChange;
+      validateOnBlur = validateOnBlur ?? formik.validateOnBlur;
+
+      const formikRef = useRef(formik);
+      useEffect(() => {
+        formikRef.current = formik;
+      }, [formik]);
+
+      const invalidateValueFlagRef = useRef(true);
+
       const internalOnBlur = useCallback(
         async (...args: any[]) => {
-          setInvalidateValueFlag(false);
-          await helpers.setTouched(true, invalidateValueFlag && validateOnBlur);
+          const shouldValidate =
+            invalidateValueFlagRef.current && validateOnBlur;
+          invalidateValueFlagRef.current = false;
+          const helpers = formikRef.current.getFieldHelpers(name);
+          await helpers.setTouched(true, shouldValidate);
           onBlur?.(...args);
         },
-        [
-          onBlur,
-          helpers,
-          setInvalidateValueFlag,
-          invalidateValueFlag,
-          validateOnBlur,
-        ]
+        [name, onBlur, validateOnBlur]
       );
       const internalOnChange = useCallback(
         async (value: any, ...args: any[]) => {
@@ -127,26 +137,27 @@ export default function createField<P>(component: ComponentType<P>) {
           if (value?.nativeEvent instanceof Event && value?.target) {
             value = value.target.value;
           }
-          setInvalidateValueFlag(true);
+          if (nullable && value === undefined) {
+            value = null;
+          }
+          invalidateValueFlagRef.current = true;
+          const helpers = formikRef.current.getFieldHelpers(name);
+          const meta = formikRef.current.getFieldMeta(name);
           if (!meta.touched) {
-            helpers.setTouched(true, false);
+            await helpers.setTouched(true, false);
           }
           await helpers.setValue(value, validateOnChange);
           onChange?.(value, ...args);
         },
-        [
-          meta.touched,
-          onChange,
-          helpers,
-          setInvalidateValueFlag,
-          validateOnChange,
-        ]
+        [name, onChange, validateOnChange]
       );
+
+      const internalValue = nullable ? field.value ?? undefined : field.value;
 
       const children = (
         <Component
           {...props}
-          value={field.value}
+          value={internalValue}
           onBlur={internalOnBlur}
           onChange={internalOnChange}
         />
@@ -165,7 +176,7 @@ export default function createField<P>(component: ComponentType<P>) {
           <FormItem
             label={label}
             required={!!required}
-            {...getStatusProps(meta, form.isValidating)}
+            {...getStatusProps(meta, formik.isValidating)}
             {...formItemProps}
           >
             {element}

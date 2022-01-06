@@ -41,6 +41,7 @@ export const Default: Story = () => {
           [Yup.ref('password'), null],
           '密码必须一致'
         ),
+        searchKey: Yup.string().nullable().required('请输入'),
       }),
     []
   );
@@ -52,6 +53,7 @@ export const Default: Story = () => {
         password: '',
         sex: '',
         checkbox: true,
+        searchKey: null,
       }}
       validationSchema={validationSchema}
       onSubmit={(values) => {
@@ -64,13 +66,14 @@ export const Default: Story = () => {
       }}
     >
       {({ handleSubmit }) => (
-        <Form layout="vertical">
+        <Form layout="vertical" onSubmit={() => handleSubmit()}>
           <Input
             name="username"
             label="用户名"
             placeholder="请输入用户名"
             validateOnChange={false}
             formItemProps={{ hasFeedback: false, extra: '最多10个字符' }}
+            allowClear
           />
           <Input
             name="url"
@@ -103,12 +106,14 @@ export const Default: Story = () => {
             label="密码确认"
             placeholder="请再次输入密码"
           />
-          <Select name="searchKey" label="searchKey" options={options} />
-          <Button
-            htmlType="button"
-            type="primary"
-            onClick={() => handleSubmit()}
-          >
+          <Select
+            name="searchKey"
+            label="searchKey"
+            options={options}
+            allowClear
+            nullable
+          />
+          <Button htmlType="submit" type="primary">
             提交
           </Button>
         </Form>
