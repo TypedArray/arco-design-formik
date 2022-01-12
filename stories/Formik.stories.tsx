@@ -1,10 +1,10 @@
-import { Button, Form } from '@arco-design/web-react';
+import { Button } from '@arco-design/web-react';
 import '@arco-design/web-react/dist/css/arco.css';
 import { Meta, Story } from '@storybook/react';
 import { Formik } from 'formik';
 import React, { ChangeEvent, HTMLProps, useCallback, useMemo } from 'react';
 import * as Yup from 'yup';
-import { Checkbox, createField, Input, RadioGroup, Select } from '../src';
+import { Checkbox, createField, Form, Input, RadioGroup, Select } from '../src';
 
 const meta: Meta = {
   title: 'Formik',
@@ -66,7 +66,7 @@ export const Default: Story = () => {
       }}
     >
       {({ handleSubmit }) => (
-        <Form layout="vertical" onSubmit={() => handleSubmit()}>
+        <Form layout="vertical">
           <Input
             name="username"
             label="用户名"
@@ -112,6 +112,7 @@ export const Default: Story = () => {
             options={options}
             allowClear
             nullable
+            placeholder="请选择"
           />
           <Button htmlType="submit" type="primary">
             提交
