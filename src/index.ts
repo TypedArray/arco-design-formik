@@ -20,16 +20,24 @@ export default createField;
 /**
  * Arco Design Form onSubmit / onReset
  */
-const Form = (props: FormProps) => {
-  const { handleSubmit, handleReset } = useFormikContext();
-  const onSubmit = useCallback(() => handleSubmit(), [handleSubmit]);
-  const onReset = useCallback(() => handleReset(), [handleReset]);
-  return React.createElement(Form_, {
-    onSubmit,
-    onReset,
-    ...props,
-  });
-};
+const Form = Object.assign(
+  (props: FormProps) => {
+    const { handleSubmit, handleReset } = useFormikContext();
+    const onSubmit = useCallback(() => handleSubmit(), [handleSubmit]);
+    const onReset = useCallback(() => handleReset(), [handleReset]);
+    return React.createElement(Form_, {
+      onSubmit,
+      onReset,
+      ...props,
+    });
+  },
+  {
+    Item: Form_.Item,
+    List: Form_.List,
+    Control: Form_.Control,
+    useForm: Form_.useForm,
+  }
+);
 
 export { createField, Form };
 export const Select = createField(Select_);
