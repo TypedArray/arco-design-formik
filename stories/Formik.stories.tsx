@@ -100,7 +100,12 @@ export const Default: Story = () => {
           <Checkbox name="checkbox" label="Checkbox">
             Checkbox
           </Checkbox>
-          <Input name="password" label="密码" placeholder="请输入密码" />
+          <Input
+            name="password"
+            label="密码"
+            placeholder="请输入密码"
+            formItemProps={{ extra: 'extra 请输入密码' }}
+          />
           <Input
             name="passwordConfirmation"
             label="密码确认"

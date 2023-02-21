@@ -13,7 +13,7 @@ export default function getStatusProps(
   const validateStatus = getStatus(meta, isValidating);
   return {
     validateStatus,
-    help: validateStatus === 'error' && meta.error,
+    help: validateStatus === 'error' ? meta.error : void 0,
   };
 }
 
